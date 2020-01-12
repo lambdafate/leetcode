@@ -7,7 +7,6 @@ class Solution:
             helper[target - value] = index
         return None
 
-
 if __name__ == "__main__":
     nums = [3,2,4]
     target = 6
