@@ -1,4 +1,4 @@
-import queue as Queue
+from collections import deque
 
 # Definition for a binary tree node.
 class TreeNode(object):
@@ -14,29 +14,24 @@ class Codec:
         :type root: TreeNode
         :rtype: str
         """
+        if root is None:
+            return "[null]"
         ret = []
-        queue = Queue.Queue()
-        queue.put(root)
-        while queue:
-            level = []
-            flag = False
-            for _ in range(queue.qsize()):
-                tmp = queue.get()
-                if tmp:
-                    queue.put(tmp.left)
-                    queue.put(tmp.right)
-                    level.append(str(tmp.val))
-                    flag = True
-                else:
-                    queue.put(None)
-                    queue.put(None)
-                    level.append('null')
-            if not flag:
-                break
-            ret.extend(level)
-        if len(ret) == 0:
-            ret.append('null')
-        return "[" + ",".join(ret) + "]"
+        queue = deque([root])
+        curr, last = None, root
+        while last is not curr:
+            curr = queue.popleft()
+            if curr:
+                ret.append(str(curr.val))
+                queue.append(curr.left)
+                queue.append(curr.right)
+                last = curr.right or curr.left or last
+            else:
+                ret.append('null')
+                queue.append(None)
+                queue.append(None)
+
+        return "[" + ",".join(list(ret)) + "]"
 
     def deserialize(self, data):
         """Decodes your encoded data to tree.
@@ -46,28 +41,27 @@ class Codec:
         """
         if not data:
             return None
-        data = data[1:-1]
-        ret = data.split(",")
-        root = None if ret[0] == 'null' else TreeNode(ret[0])
+        values = data[1:-1].split(",")
+        root = None if values[0] == 'null' else TreeNode(int(values[0]))
         if root is None:
-            return root
-        queue = Queue.Queue()
-        queue.put(root)
+            return None
+        queue = deque([root])
         i = 1
-        while i < len(ret):
-            for _ in range(queue.qsize()):
-                tmp = queue.get()
-                if tmp:
-                    if ret[i] != 'null':
-                        tmp.left = TreeNode(int(ret[i]))
-                    if ret[i+1] != 'null':
-                        tmp.right = TreeNode(int(ret[i+1]))
-                    queue.put(tmp.left)
-                    queue.put(tmp.right)
-                else:
-                    queue.put(None)
-                    queue.put(None)
-                i += 2
+        while i < len(values):
+            curr = queue.popleft()
+            if curr:
+                if values[i] != 'null':
+                    curr.left = TreeNode(int(values[i]))
+                if i + 1 >= len(values):
+                    break
+                if values[i+1] != 'null':
+                    curr.right = TreeNode(int(values[i+1]))
+                queue.append(curr.left)
+                queue.append(curr.right)
+            else:
+                queue.append(None)
+                queue.append(None)
+            i += 2
         return root
 
 # Your Codec object will be instantiated and called as such:
