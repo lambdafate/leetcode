@@ -6,10 +6,13 @@ class Solution:
             (1, 0),
             (0, 1)
         ]
+        self.cache = set()
 
     def dfs(self, heights, i, j, limit, access):
         if i == len(heights)-1 and j == len(heights[0])-1:
             return True
+        if (i, j) in self.cache:
+            return False
         end = (len(heights)-1, len(heights[0])-1)
         indexi, indexj = i, j
         access.add((indexi, indexj))
@@ -19,13 +22,15 @@ class Solution:
             if i >= 0 and i <= end[0] and j >= 0 and j <= end[1] and (i, j) not in access:
                 if abs(heights[i][j]-heights[indexi][indexj]) <= limit and self.dfs(heights, i, j, limit, access):
                     return True
-        # access.remove((indexi, indexj))
+        access.remove((indexi, indexj))
+        self.cache.add((indexi, indexj))
         return False
         
     def minimumEffortPath(self, heights):
         l, r = 0, 10**6 - 1
         while l < r:
             limit = (l + r) >> 1
+            self.cache = set()
             if self.dfs(heights, 0, 0, limit, set()):
                 r = limit
             else:
