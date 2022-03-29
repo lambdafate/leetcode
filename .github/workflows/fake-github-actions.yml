@@ -1,0 +1,20 @@
+name: Fake GitHub Actions
+on: [push]
+
+jobs:
+  job-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "GitHub actions init"
+        run : echo "${{ github.actor }} make a ci/cd base on ${{ github.repository }}"
+      - name: "checkout master branch"
+        uses: actions/checkout@master
+  
+  job-check-code-style:
+    runs-on: ubuntu-latest
+    needs: [job-build]
+    steps:
+      - name: "代码风格检查"
+        run : echo "code style checking"
+      - name: "CI/CD result"
+        run : echo "CI/CD ${{ job.status }}"
